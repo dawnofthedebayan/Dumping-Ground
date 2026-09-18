@@ -739,12 +739,13 @@ def _render_job(job):
 
 # ---------------------------------------------------------------- encoding + CLI
 
-def encode_gif(frames_dir, fps, out_path):
+def encode_gif(frames_dir, fps, out_path, loop=False):
+    """loop=False plays the GIF once and stops on its last frame (no NETSCAPE loop block)."""
     vf = ("split[a][b];[a]palettegen=max_colors=256:stats_mode=full[p];"
           "[b][p]paletteuse=dither=sierra2_4a:diff_mode=rectangle")
     subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(fps),
                     "-i", str(Path(frames_dir) / "f_%05d.png"), "-filter_complex", vf,
-                    "-loop", "0", str(out_path)], check=True)
+                    "-loop", "0" if loop else "-1", str(out_path)], check=True)
 
 
 def main(name, duration, timeline):
@@ -757,6 +758,8 @@ def main(name, duration, timeline):
     ap.add_argument("--out", type=Path, default=HERE / "output")
     ap.add_argument("--workers", type=int, default=max(1, min(6, (os.cpu_count() or 2) - 1)))
     ap.add_argument("--keep-frames", action="store_true", help="keep the PNG frames next to the GIF")
+    ap.add_argument("--loop", action="store_true",
+                    help="loop forever (default: play once and stay on the last frame)")
     args = ap.parse_args()
 
     width, height, ss = (1920, 1080, 1) if args.preview else (OUT_W, OUT_H, args.ss)
@@ -773,7 +776,7 @@ def main(name, duration, timeline):
         for k, _ in enumerate(pool.imap(_render_job, jobs), 1):
             print(f"\r  rendered {k}/{n}", end="", flush=True)
     print("\n  encoding GIF ...")
-    encode_gif(frames_dir, args.fps, out_gif)
+    encode_gif(frames_dir, args.fps, out_gif, loop=args.loop)
 
     if args.keep_frames:
         dest = args.out / f"{name}{suffix}_frames"
