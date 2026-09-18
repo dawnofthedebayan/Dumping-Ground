@@ -760,6 +760,9 @@ def main(name, duration, timeline):
     ap.add_argument("--keep-frames", action="store_true", help="keep the PNG frames next to the GIF")
     ap.add_argument("--loop", action="store_true",
                     help="loop forever (default: play once and stay on the last frame)")
+    ap.add_argument("--hold", type=float, default=60,
+                    help="minutes to hold the last frame, for apps that loop every GIF such as "
+                         "Google Slides (default 60, 0 = no hold)")
     args = ap.parse_args()
 
     width, height, ss = (1920, 1080, 1) if args.preview else (OUT_W, OUT_H, args.ss)
@@ -777,6 +780,8 @@ def main(name, duration, timeline):
             print(f"\r  rendered {k}/{n}", end="", flush=True)
     print("\n  encoding GIF ...")
     encode_gif(frames_dir, args.fps, out_gif, loop=args.loop)
+    from set_gif_loop import finish_gif
+    finish_gif(out_gif, loop=args.loop, hold_minutes=args.hold)
 
     if args.keep_frames:
         dest = args.out / f"{name}{suffix}_frames"
