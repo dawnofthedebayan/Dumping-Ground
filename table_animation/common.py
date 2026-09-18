@@ -755,6 +755,9 @@ def main(name, duration, timeline):
                     help="GIF delays are in 1/100 s, so 25 or 50 give exact timing (default 25)")
     ap.add_argument("--ss", type=int, default=2, help="supersampling factor (default 2)")
     ap.add_argument("--preview", action="store_true", help="quick 1920x1080 render, no supersampling")
+    ap.add_argument("--size", default=f"{OUT_W}x{OUT_H}",
+                    help="output size WxH (default 3840x2160; 1920x1080 for Google Slides, which "
+                         "fails to load the heaviest 4K animated GIFs)")
     ap.add_argument("--out", type=Path, default=HERE / "output")
     ap.add_argument("--workers", type=int, default=max(1, min(6, (os.cpu_count() or 2) - 1)))
     ap.add_argument("--keep-frames", action="store_true", help="keep the PNG frames next to the GIF")
@@ -765,7 +768,11 @@ def main(name, duration, timeline):
                          "Google Slides (default 60, 0 = no hold)")
     args = ap.parse_args()
 
-    width, height, ss = (1920, 1080, 1) if args.preview else (OUT_W, OUT_H, args.ss)
+    if args.preview:
+        width, height, ss = 1920, 1080, 1
+    else:
+        width, height = map(int, args.size.lower().split("x"))
+        ss = max(args.ss, round(OUT_W / width))  # always draw at >= 4K, then downsample
     suffix = "_preview" if args.preview else ""
     args.out.mkdir(parents=True, exist_ok=True)
     out_gif = args.out / f"{name}{suffix}.gif"
