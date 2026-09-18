@@ -37,8 +37,8 @@ NOTE_Y = 46.0
 # ---------------------------------------------------------------- global clock
 
 FPS = 25
-DURATIONS = {"monitor": 20.5, "data": 14.0, "concept": 19.0, "constant": 42.0,
-             "retrain": 21.0}
+DURATIONS = {"monitor": 20.5, "data": 14.0, "concept": 19.0, "constant": 38.0,
+             "retrain": 21.0}  # keep each under Google Slides' 1000-frame limit
 
 
 def last_frame_time(duration):

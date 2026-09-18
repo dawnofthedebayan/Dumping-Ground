@@ -800,6 +800,10 @@ def main(name, duration, timeline, default_size=f"{OUT_W}x{OUT_H}", default_out=
         shutil.rmtree(frames_dir)
     print(f"  wrote {out_gif} ({out_gif.stat().st_size / 1e6:.1f} MB)")
     check_macos_decodes(out_gif)
+    frames = Image.open(out_gif).n_frames
+    if frames > 1000:
+        print(f"  WARNING: {frames} frames. Google Slides rejects GIFs with more than 1000 frames; "
+              "shorten the animation or lower --fps.")
 
 
 def check_macos_decodes(path):
