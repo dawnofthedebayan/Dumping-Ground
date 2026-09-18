@@ -690,26 +690,28 @@ def _draw_free(c, st):
     for color, x0, y0, x1, y1, r, a in st["tiles"]:
         if a > 0.004:
             c.rrect(x0, y0, x1, y1, r, blend(color, a))
-    for x0, y0, x1, y1, r, a, w in st["boxes"]:
+    for x0, y0, x1, y1, r, a, w, *color in st["boxes"]:  # optional colour after width
         if a > 0.004:
-            c.rrect_outline(x0, y0, x1, y1, r, blend(INK, a), w)
-    for x0, y0, x1, y1, w, a, dashed in st["lines"]:
+            c.rrect_outline(x0, y0, x1, y1, r, blend(color[0] if color else INK, a), w)
+    for x0, y0, x1, y1, w, a, dashed, *color in st["lines"]:  # optional colour after dashed
         if a <= 0.004:
             continue
+        ink = color[0] if color else INK
         if not dashed:
-            c.line([(x0, y0), (x1, y1)], blend(INK, a), w)
+            c.line([(x0, y0), (x1, y1)], blend(ink, a), w)
             continue
         n = max(1, round(math.hypot(x1 - x0, y1 - y0) / 0.45))
         for k in range(n):
             s0, s1 = k / n, (k + 0.6) / n
             c.line([(lerp(x0, x1, s0), lerp(y0, y1, s0)), (lerp(x0, x1, s1), lerp(y0, y1, s1))],
-                   blend(INK, a), w)
+                   blend(ink, a), w)
     for x, y, text, size, color, a, bold, anchor in st["texts"]:
         if a > 0.004:
             c.text(x, y, text, FONT_BOLD if bold else FONT_MEDIUM, size, blend(color, a), anchor)
-    for x, y, text, size, a in st["pills"]:
+    for x, y, text, size, a, *colors in st["pills"]:  # optional (bg, fg) after alpha
         if a > 0.004:
-            c.pill(x, y, text, FONT_BOLD, size, WHITE, INK, a)
+            bg, fg = (colors + [INK, WHITE][len(colors):])[:2] if colors else (INK, WHITE)
+            c.pill(x, y, text, FONT_BOLD, size, fg, bg, a)
 
 
 def render_frame(state, width=OUT_W, height=OUT_H, ss=2):
@@ -748,17 +750,17 @@ def encode_gif(frames_dir, fps, out_path, loop=False):
                     "-loop", "0" if loop else "-1", str(out_path)], check=True)
 
 
-def main(name, duration, timeline):
+def main(name, duration, timeline, default_size=f"{OUT_W}x{OUT_H}", default_out="output"):
     """timeline(t) -> state dict (see default_state) for t in seconds."""
     ap = argparse.ArgumentParser(description=f"Render {name}.gif (3840x2160)")
     ap.add_argument("--fps", type=int, default=25,
                     help="GIF delays are in 1/100 s, so 25 or 50 give exact timing (default 25)")
     ap.add_argument("--ss", type=int, default=2, help="supersampling factor (default 2)")
     ap.add_argument("--preview", action="store_true", help="quick 1920x1080 render, no supersampling")
-    ap.add_argument("--size", default=f"{OUT_W}x{OUT_H}",
+    ap.add_argument("--size", default=default_size,
                     help="output size WxH (default 3840x2160; 1920x1080 for Google Slides, which "
                          "fails to load the heaviest 4K animated GIFs)")
-    ap.add_argument("--out", type=Path, default=HERE / "output")
+    ap.add_argument("--out", type=Path, default=HERE / default_out)
     ap.add_argument("--workers", type=int, default=max(1, min(6, (os.cpu_count() or 2) - 1)))
     ap.add_argument("--keep-frames", action="store_true", help="keep the PNG frames next to the GIF")
     ap.add_argument("--loop", action="store_true",
