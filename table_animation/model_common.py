@@ -25,8 +25,8 @@ import math
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 
-from common import (GREEN, HEADER_BG, INK, MUTED, N_ROWS, RED, RED_DARK, encoded_text, lerp,
-                    progress)
+from common import (CORRECT, GREEN, HEADER_BG, INK, MUTED, N_ROWS, RED, RED_DARK, encoded_text,
+                    lerp, progress)
 from split_common import CAMERA, CHRONO, CX, LABELS, color
 
 # ---------------------------------------------------------------- data
@@ -137,7 +137,10 @@ ACCURACY = (TP + TN) / N_TEST
 PRECISION = TP / (TP + FP)
 RECALL = TP / (TP + FN)
 F1 = 2 * PRECISION * RECALL / (PRECISION + RECALL)
-WIND_RULE_ACC = float(np.mean((X[TEST, KEYS.index("wind")] > 25) == Y[TEST]))
+# The hand-written rule from animations 5-6, scored the way animation 6 scored it on screen:
+# over all 100 flights (60 / 100). It was never trained on anything, so there is no held-out
+# set to keep back from it, and quoting the same 60% here keeps the whole deck consistent.
+WIND_RULE_ACC = sum(CORRECT) / N_ROWS
 
 
 def pct(v):
