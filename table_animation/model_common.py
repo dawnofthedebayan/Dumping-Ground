@@ -25,8 +25,8 @@ import math
 import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 
-from common import (GREEN, HEADER_BG, INK, MUTED, N_ROWS, RED, RED_DARK, encoded_text, lerp,
-                    progress)
+from common import (CORRECT, GREEN, HEADER_BG, INK, MUTED, N_ROWS, RED, RED_DARK, encoded_text,
+                    lerp, progress)
 from split_common import CAMERA, CHRONO, CX, LABELS, color
 
 # ---------------------------------------------------------------- data
@@ -137,7 +137,10 @@ ACCURACY = (TP + TN) / N_TEST
 PRECISION = TP / (TP + FP)
 RECALL = TP / (TP + FN)
 F1 = 2 * PRECISION * RECALL / (PRECISION + RECALL)
-WIND_RULE_ACC = float(np.mean((X[TEST, KEYS.index("wind")] > 25) == Y[TEST]))
+# The hand-written rule from animations 5-6, scored the way animation 6 scored it on screen:
+# over all 100 flights (60 / 100). It was never trained on anything, so there is no held-out
+# set to keep back from it, and quoting the same 60% here keeps the whole deck consistent.
+WIND_RULE_ACC = sum(CORRECT) / N_ROWS
 
 
 def pct(v):
@@ -186,17 +189,17 @@ class Scene:
         if a > 0.004:
             self.tiles.append((col, *rect, r, a))
 
-    def pill(self, x, y, s, size, a):
+    def pill(self, x, y, s, size, a, bg=None, fg=None):
         if a > 0.004:
-            self.pills.append((x, y, s, size, a))
+            self.pills.append((x, y, s, size, a) + ((bg, fg) if bg else ()))
 
-    def box(self, rect, a, r=0.35, w=0.07):
+    def box(self, rect, a, r=0.35, w=0.07, color=None):
         if a > 0.004:
-            self.boxes.append((*rect, r, a, w))
+            self.boxes.append((*rect, r, a, w) + ((color,) if color else ()))
 
-    def line(self, x0, y0, x1, y1, a, w=0.06, dashed=False):
+    def line(self, x0, y0, x1, y1, a, w=0.06, dashed=False, color=None):
         if a > 0.004:
-            self.lines.append((x0, y0, x1, y1, w, a, dashed))
+            self.lines.append((x0, y0, x1, y1, w, a, dashed) + ((color,) if color else ()))
 
     def arrow(self, x0, y, x1, a):
         self.line(x0, y, x1, y, a, 0.08)
@@ -493,8 +496,8 @@ def fade_state(st, a):
     """A copy of a finished animation's state with every free element at opacity a."""
     s = dict(st)
     s["tiles"] = [(*x[:6], x[6] * a) for x in st.get("tiles", [])]
-    s["boxes"] = [(*x[:5], x[5] * a, x[6]) for x in st.get("boxes", [])]
-    s["lines"] = [(*x[:5], x[5] * a, x[6]) for x in st.get("lines", [])]
+    s["boxes"] = [(*x[:5], x[5] * a, *x[6:]) for x in st.get("boxes", [])]
+    s["lines"] = [(*x[:5], x[5] * a, *x[6:]) for x in st.get("lines", [])]
     s["texts"] = [(*x[:5], x[5] * a, *x[6:]) for x in st.get("texts", [])]
-    s["pills"] = [(*x[:4], x[4] * a) for x in st.get("pills", [])]
+    s["pills"] = [(*x[:4], x[4] * a, *x[5:]) for x in st.get("pills", [])]
     return s

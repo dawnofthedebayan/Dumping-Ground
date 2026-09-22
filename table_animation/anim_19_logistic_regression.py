@@ -16,7 +16,7 @@ DURATION = 8.6  # s
 TITLE = ("Model 1: logistic regression",
          "It learns one weight per feature: how strongly that feature pushes towards a delay")
 HEADER = "LOGISTIC REGRESSION"
-NOTE = "Nobody wrote these rules: the weights were learned from the 80 training flights"
+NOTE = "The rules were learned automatically by the model."
 TRAIN_START, TRAIN_LEN = 1.4, 4.2
 
 
