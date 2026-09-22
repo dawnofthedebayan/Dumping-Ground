@@ -14,7 +14,8 @@ Two features only, so the model's thinking fits on a screen; the models and the 
 
 import anim_26a_two_scores as previous
 from common import main, progress
-from fit_common import PANEL_RECTS, SNAP_K, draw_panel, draw_panel_header, draw_scores
+from fit_common import (PANEL_RECTS, SNAP_K, draw_panel, draw_panel_header, draw_scores,
+                        stacked_notes)
 from model_common import Scene, fade_state
 from split_common import CX
 
@@ -24,9 +25,11 @@ END = previous.timeline(previous.DURATION)
 TITLE = ("Underfitting and overfitting",
          "The same model, the same 80 flights - one dial turned: how many trees it may use")
 STARTS = (2.7, 4.9, 7.1)
-NOTE_1 = "Same data, same algorithm - the only difference is how much freedom it was given"
-NOTE_2 = ("The score on what it has seen only ever goes up.  The score on what it has not "
-          "peaks in the middle - and then falls.")
+NOTES = [
+    (2.0, "It is the same data, same algorithm, but we modified how much complexity the model had"),
+    (9.6, "The score on what it has seen (training data) only ever goes up.  The score on what it "
+          "has not seen (test data) peaks in the middle and then falls."),
+]
 
 
 def timeline(t):
@@ -40,8 +43,7 @@ def timeline(t):
                    axes=progress(t, 1.9, 0.5), reveal=progress(t, start, 0.9))
         draw_panel_header(sc, rect, k, progress(t, start - 0.5, 0.5))
         draw_scores(sc, rect, k, progress(t, start + 0.5, 0.4), progress(t, start + 0.6, 0.9))
-    sc.pill(CX, 13.8, NOTE_1, 0.36, progress(t, 2.0, 0.5) * (1 - progress(t, 9.3, 0.4)))
-    sc.pill(CX, 13.8, NOTE_2, 0.36, progress(t, 9.6, 0.5))
+    stacked_notes(sc, CX, NOTES, t, y0=13.8)
     st = sc.state()
     old = fade_state(END, 1 - progress(t, 0.15, 0.45))
     for key in ("tiles", "boxes", "lines", "texts", "pills"):

@@ -14,7 +14,7 @@ import anim_26b_underfit_overfit as previous
 from common import INK, MUTED, RED, ease_in_out_cubic, main, progress
 from fit_common import (BEST, CHART, FRAME, N_TREES, PANEL_RECTS, SNAPS, SNAP_K, TEST_COL,
                         TEST_LOSS, THUMB_RECTS, TRAIN_COL, TRAIN_LOSS, chart_x, chart_y, curve_label,
-                        draw_axes, draw_bands, draw_curve, draw_gap, draw_panel)
+                        draw_axes, draw_bands, draw_curve, draw_gap, draw_panel, stacked_notes)
 from model_common import Scene, fade_state
 from split_common import CX, lerp_rect
 
@@ -24,9 +24,9 @@ END = previous.timeline(previous.DURATION)
 TITLE = ("Catching it  ·  training loss vs test loss",
          "Turn the dial one tree at a time and score the model twice after every step")
 NOTES = [
-    (2.6, 7.3, "Loss = how wrong the model is, including how confident it was.  Lower is better."),
-    (7.6, 11.3, "The widening gap is the part the model kept to itself instead of learning"),
-    (11.6, None, f"Stop where the test line turns up.  That is early stopping - here, {BEST} trees."),
+    (2.6, "Loss = how wrong the model is, including how confident it was.  Lower is better."),
+    (7.6, "The widening gap is the part where the model learned too many rules"),
+    (11.6, f'Stop where the test line turns up.  That is called "early stopping", at {BEST} trees.'),
 ]
 STOP = f"STOP HERE  ·  {BEST} TREES"
 
@@ -65,9 +65,7 @@ def timeline(t):
         sc.tile(RED, (x - 0.17, y - 0.17, x + 0.17, y + 0.17), stop, 0.17)
         sc.pill(x + 3.4, y + 1.25, STOP, 0.34, stop, RED, (255, 255, 255))
 
-    for start, end, text in NOTES:
-        sc.pill(CX, 13.9, text, 0.36,
-                progress(t, start, 0.5) * (1 - (progress(t, end, 0.4) if end else 0)))
+    stacked_notes(sc, CX, NOTES, t, 0.34)
 
     st = sc.state()
     old = fade_state(END, 1 - progress(t, 0.15, 0.45))

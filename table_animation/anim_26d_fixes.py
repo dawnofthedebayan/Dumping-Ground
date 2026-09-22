@@ -49,9 +49,7 @@ COLS = [
           "MSN, serial numbers, exact timestamps: perfect memory, zero prediction"),
      ]),
 ]
-NOTE_1 = "The two scores are the diagnosis.  The column you are in decides the treatment."
-NOTE_2 = ("Judge every fix by cross-validation, not one lucky split.  And never tune on "
-          "the test set: once you do, it stops being one")
+NOTE = "Based on the scores in the test set, you decide the treatment the model gets."
 ROW0, ROW_STEP = 5.75, 1.42
 
 
@@ -80,8 +78,7 @@ def timeline(t):
         column(sc, j, progress(t, 1.0 + 0.25 * j, 0.5),
                [progress(t, start + k * 0.75, 0.45) for k in range(5)])
     sc.line(18.0, 2.3, 18.0, 12.6, progress(t, 1.5, 0.6) * 0.5, 0.04, True, FRAME)
-    sc.pill(CX, 13.6, NOTE_1, 0.36, progress(t, 2.6, 0.5) * (1 - progress(t, 10.4, 0.4)))
-    sc.pill(CX, 13.6, NOTE_2, 0.36, progress(t, 10.7, 0.5))
+    sc.pill(CX, 13.6, NOTE, 0.36, progress(t, 2.6, 0.5))
     st = sc.state()
     old = fade_state(END, 1 - progress(t, 0.15, 0.45))
     for key in ("tiles", "boxes", "lines", "texts", "pills"):

@@ -21,7 +21,7 @@ import numpy as np
 from sklearn.ensemble import GradientBoostingClassifier
 from sklearn.metrics import log_loss
 
-from common import GREEN, HEADER_BG, INK, MUTED, RED, WHITE, clamp01, lerp, mix
+from common import GREEN, HEADER_BG, INK, MUTED, RED, WHITE, clamp01, lerp, mix, progress
 from model_common import ACCURACY, GB, KEYS, TEST, TRAIN, X, Y, Scene, pct
 from split_common import color
 
@@ -168,7 +168,7 @@ def draw_scores(sc, rect, k, a, count=1.0):
 
 # ---------------------------------------------------------------- the loss chart
 
-CHART = (3.2, 6.35, 34.2, 12.05)
+CHART = (3.2, 6.35, 34.2, 11.75)
 LOSS_HI = 0.85
 TRAIN_COL = mix(WHITE, INK, 0.42)
 TEST_COL = INK
@@ -223,6 +223,15 @@ def draw_gap(sc, upto, a):
         yt, yv = chart_y(TRAIN_LOSS[k]), chart_y(TEST_LOSS[k])
         sc.tile(mix(WHITE, RED, 0.15), (chart_x(k + 1), min(yt, yv), chart_x(k + 2) + 0.02,
                                        max(yt, yv)), a, 0.0)
+
+
+FOOT_Y, FOOT_STEP = 13.45, 0.86
+
+
+def stacked_notes(sc, x, notes, t, size=0.36, y0=FOOT_Y, step=FOOT_STEP):
+    """Footer captions that build up one under the other and all stay on screen to the end."""
+    for k, (start, text) in enumerate(notes):
+        sc.pill(x, y0 + k * step, text, size, progress(t, start, 0.5))
 
 
 def curve_label(sc, tree, values, text, a, col, dy=-0.55, anchor="lm"):

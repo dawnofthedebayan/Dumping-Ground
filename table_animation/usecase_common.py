@@ -444,7 +444,7 @@ MAE_BOTH = "flight_hours is scored exactly the same way, and counts for half the
 MAE_X0, MAE_X1, MAE_BASE, MAE_SCALE = 14.0, 92.0, 44.6, 0.62
 MAE_FORMULA = (f"MAE  =  (sum of the 12 monthly errors) / 12  =  {SUM_ERR} / 12  "
                f"=  {MAE:.1f} flight cycles a month")
-MAE_NOTE = "One number for how far off we are - but is 6 cycles a lot, or a little?"
+MAE_NOTE = "One number for how far off we are."
 
 
 def draw_mae(sc, a, bars=0.0, formula=0.0):
