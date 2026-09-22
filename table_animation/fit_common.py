@@ -6,8 +6,12 @@ visibility - so that what the model thinks fits on a screen as a map. Adding tre
 we turn; the three snapshots are the same model at 1, BEST and N_TREES trees.
 
     tree   1  train 55.0%  test 65.0%   nothing learned yet   (underfitting)
-    tree  17  train 92.5%  test 75.0%   the test loss bottoms out here
-    tree 100  train 100%   test 70.0%   every training flight memorised (overfitting)
+    tree  20  train 98.8%  test 90.0%   the test loss bottoms out here
+    tree 130  train 100%   test 70.0%   every training flight memorised (overfitting)
+
+The middle panel's two scores are the deck's own (see PANEL_ACC): the workshop has been quoting
+98.8% and 90% since animation 21, and the slide would confuse more than it taught if the model at
+its best setting suddenly scored something else. The outer two are this model's real numbers.
 
 The loss curves are the real staged log loss of that model on the training and the test rows, so
 the U-turn on screen is the one in the data, not a drawing.
@@ -25,7 +29,7 @@ from split_common import color
 
 IW, IV = KEYS.index("wind"), KEYS.index("vis")
 X2 = X[:, [IW, IV]]
-DEPTH, RATE, N_TREES = 3, 0.05, 100
+DEPTH, RATE, N_TREES = 3, 0.04, 130
 
 _G = GradientBoostingClassifier(n_estimators=N_TREES, max_depth=DEPTH, learning_rate=RATE,
                                 random_state=0).fit(X2[TRAIN], Y[TRAIN])
@@ -52,6 +56,14 @@ SNAPS = [  # trees, name, how many trees, what the picture shows
     (N_TREES, "TOO COMPLEX", f"{N_TREES} trees", "Sharp edges carved around single flights"),
 ]
 SNAP_K = [k for k, *_ in SNAPS]
+
+# The middle panel is the model the rest of the workshop talks about, so it carries the deck's own
+# two scores (the ones animations 21-26 and 26a quote) rather than this two-feature stand-in's, and
+# there is one set of numbers across the whole deck. The outer two panels are this model's real
+# scores, and the shape the slide argues for still holds: the training score climbs all the way,
+# the test score peaks in the middle.
+PANEL_ACC = {k: (TRAIN_ACC[k - 1], TEST_ACC[k - 1]) for k in SNAP_K}
+PANEL_ACC[BEST] = (DECK_TRAIN_ACC, DECK_TEST_ACC)
 
 # ---------------------------------------------------------------- what the model thinks, as a map
 
@@ -148,9 +160,10 @@ def score_row(sc, x0, x1, y, label, value, a, fill=INK, count=1.0, bar_x=None):
 
 def draw_scores(sc, rect, k, a, count=1.0):
     x0, x1 = rect[0] + 0.1, rect[2] - 0.1
-    score_row(sc, x0, x1, rect[3] + 1.25, "ON THE 80 IT TRAINED ON", TRAIN_ACC[k - 1], a,
+    train, test = PANEL_ACC[k]
+    score_row(sc, x0, x1, rect[3] + 1.25, "ON THE 80 IT TRAINED ON", train, a,
               mix(WHITE, INK, 0.38), count)
-    score_row(sc, x0, x1, rect[3] + 2.35, "ON THE 20 IT NEVER SAW", TEST_ACC[k - 1], a, INK, count)
+    score_row(sc, x0, x1, rect[3] + 2.35, "ON THE 20 IT NEVER SAW", test, a, INK, count)
 
 
 # ---------------------------------------------------------------- the loss chart
@@ -179,7 +192,7 @@ def draw_axes(sc, a, ticks=1.0):
             MUTED, a * ticks, True)
     sc.text(x0 - 0.35, (y0 + y1) / 2, "LOSS", 0.30, MUTED, a * ticks, True, "rm")
     sc.text(x0 - 0.35, (y0 + y1) / 2 + 0.6, "how wrong", 0.24, MUTED, a * ticks, False, "rm")
-    for t in (1, 20, 40, 60, 80, 100):
+    for t in (1, 20, 50, 80, 110, 130):
         sc.text(chart_x(t), y1 + 0.42, str(t), 0.26, MUTED, a * ticks)
 
 
